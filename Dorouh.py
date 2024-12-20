@@ -1,6 +1,6 @@
 import sys
 import os
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel, QTextEdit, QHBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel, QTextEdit, QHBoxLayout, QMessageBox, QLineEdit
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QIcon
 
@@ -15,7 +15,7 @@ class Dorouh(QWidget):
         self.setWindowIcon(QIcon(os.path.join(directorio_actual, 'icon.png')))
 
         # Definir el título y tamaño de la ventana
-        self.setWindowTitle("Dorouh v0.1")
+        self.setWindowTitle("Traductor v1")
         self.setGeometry(100, 100, 800, 600)
 
         # Inicialización de variables
@@ -41,7 +41,8 @@ class Dorouh(QWidget):
                 'error_guardar': "No se pudo guardar la traducción: ",
                 'error_no_archivo': "No hay archivo cargado para guardar.",
                 'es': "Español",
-                'en': "Inglés"
+                'en': "Inglés",
+                'buscar_linea': "Buscar línea..."  # <-- Agregar esta línea
             },
             'en': {
                 'buscar_archivo': "Search file",
@@ -56,9 +57,11 @@ class Dorouh(QWidget):
                 'error_guardar': "Could not save the translation: ",
                 'error_no_archivo': "No file loaded to save.",
                 'es': "Spanish",
-                'en': "English"
+                'en': "English",
+                'buscar_linea': "Search line..."  # <-- Agregar esta línea
             }
         }
+
 
         self.initUI()
 
@@ -98,6 +101,14 @@ class Dorouh(QWidget):
         self.texto_seleccionable.setReadOnly(True)
         self.texto_seleccionable.setStyleSheet("QTextEdit { border: 1px solid #ccc; border-radius: 5px; padding: 5px; height: 80px; }")
         layout.addWidget(self.texto_seleccionable)
+
+        # Barra de búsqueda para línea
+        self.buscador = QLineEdit(self)
+        self.buscador.setPlaceholderText(self.traducciones[self.idioma]['buscar_linea'])  # <-- Aquí se actualiza el texto
+        self.buscador.setStyleSheet("QLineEdit { font-size: 14px; padding: 5px; border: 1px solid #ccc; border-radius: 5px; }")
+        self.buscador.returnPressed.connect(self.buscar_por_linea)
+        layout.addWidget(self.buscador)
+
 
         # Botón para copiar el texto seleccionado
         self.boton_copiar = QPushButton(self.traducciones[self.idioma]['copiar'], self)
@@ -171,6 +182,9 @@ class Dorouh(QWidget):
         # Actualiza la etiqueta del archivo seleccionado
         self.etiqueta_archivo.setText(f"{self.traducciones[self.idioma]['archivo_seleccionado']} {os.path.basename(self.ruta_archivo) if self.ruta_archivo else self.traducciones[self.idioma]['ningun_archivo']}")
 
+        # Actualiza el texto del buscador
+        self.buscador.setPlaceholderText(self.traducciones[self.idioma]['buscar_linea'])  # <-- Actualización aquí
+
     def seleccionar_archivo(self):
         """ Abre un cuadro de diálogo para seleccionar un archivo """
         archivo, _ = QFileDialog.getOpenFileName(self, self.traducciones[self.idioma]['buscar_archivo'], "", "Archivos Ren'Py (*.rpy)")
@@ -208,25 +222,38 @@ class Dorouh(QWidget):
             # Extrae el texto después del comentario '#'
             if '#' in linea_comentario:
                 comentario = linea_comentario.split('#', 1)[1].strip()
-                if '"' in comentario:
-                    texto = comentario.split('"')[1]
+                
+                # Buscar la primera y última comilla (") en el comentario
+                comillas = [i for i, c in enumerate(comentario) if c == '"']
+                
+                if len(comillas) >= 2:
+                    # Obtenemos el texto entre la primera y última comilla
+                    texto = comentario[comillas[0] + 1:comillas[-1]]
                     
                     # Detecta si hay una letra antes de las comillas
                     letra = comentario[0] if comentario[0].isalpha() else ""
-                    texto_con_numero_linea = f"{indice_comentario + 1} {letra}: {texto}"
+                    texto_con_numero_linea = f"{indice_comentario + 1} {letra}: {texto} "
                 else:
                     texto_con_numero_linea = f"{indice_comentario + 1}: {comentario} "
             else:
                 texto_con_numero_linea = f"{indice_comentario + 1}:"
 
             # Actualiza el área de texto seleccionable y la traducción
-            traduccion = ""
+            traduccion = ''
             if indice_comentario + 1 < len(self.lineas):
                 linea_traduccion = self.lineas[indice_comentario + 1].strip()
-                if '"' in linea_traduccion:
-                    traduccion = linea_traduccion.split('"')[1]
+                
+                # Buscar la primera y última comilla (") en la traducción
+                comillas_traduccion = [i for i, c in enumerate(linea_traduccion) if c == '"']
+                
+                if len(comillas_traduccion) >= 2:
+                    # Obtenemos el texto entre la primera y última comilla en la traducción
+                    traduccion = linea_traduccion[comillas_traduccion[0] + 1:comillas_traduccion[-1]]
+                
+            self.actualizar_texto_traducir(texto_con_numero_linea, traduccion)  
 
-            self.actualizar_texto_traducir(texto_con_numero_linea, traduccion)
+
+
 
     def actualizar_texto_traducir(self, texto, traduccion):
         """ Actualiza los cuadros de texto con la línea seleccionada y la traducción """
@@ -249,16 +276,32 @@ class Dorouh(QWidget):
             indice_comentario = self.indices_comentarios[self.indice_linea]
             traduccion = self.cuadro_traduccion.toPlainText().strip()
 
+            # Si hay una línea a traducir
             if indice_comentario + 1 < len(self.lineas) and '"' in self.lineas[indice_comentario + 1]:
-                partes = self.lineas[indice_comentario + 1].split('"')
-                if len(partes) > 1:
-                    self.lineas[indice_comentario + 1] = f'{partes[0]}"{traduccion}"{partes[2] if len(partes) > 2 else ""}'
+                linea = self.lineas[indice_comentario + 1]
+                
+                # Buscar la primera comilla
+                comillas_abiertas = linea.find('"')
+                
+                # Buscar la última comilla
+                comillas_cerradas = linea.rfind('"')
 
+                # Verificar que ambas comillas existen
+                if comillas_abiertas != -1 and comillas_cerradas != -1 and comillas_abiertas < comillas_cerradas:
+                    # Reemplazar el contenido entre la primera y la última comilla con la traducción
+                    self.lineas[indice_comentario + 1] = f'{linea[:comillas_abiertas + 1]}{traduccion}{linea[comillas_cerradas:]}'
+
+
+            # Reescribe el archivo con las líneas modificadas, asegurándose de que solo se modifique la línea correcta
             with open(self.ruta_archivo, 'w', encoding='utf-8') as f:
                 f.writelines(self.lineas)
 
         except Exception as e:
             QMessageBox.critical(self, self.traducciones[self.idioma]['error_guardar'], f"{self.traducciones[self.idioma]['error_guardar']} {e}")
+
+
+
+
 
     def linea_anterior(self):
         """ Cambia a la línea anterior """
@@ -280,6 +323,18 @@ class Dorouh(QWidget):
         self.boton_siguiente.setEnabled(self.indice_linea < len(self.indices_comentarios) - 1)
         self.boton_guardar.setEnabled(True)
 
+    def buscar_por_linea(self):
+        """ Permite buscar por línea usando el número proporcionado en la caja de búsqueda """
+        try:
+            linea_buscada = int(self.buscador.text()) - 1  # Restar 1 para que coincida con el índice
+            if linea_buscada in self.indices_comentarios:
+                self.indice_linea = self.indices_comentarios.index(linea_buscada)
+                self.cargar_linea(self.indice_linea)
+                self.actualizar_botones()
+            else:
+                QMessageBox.information(self, "No encontrado", "No se encontró.")
+        except ValueError:
+            QMessageBox.critical(self, "Error", "Por favor, ingrese un número válido.")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
