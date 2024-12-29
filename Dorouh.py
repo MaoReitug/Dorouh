@@ -305,6 +305,7 @@ class Dorouh(QWidget):
 
     def linea_anterior(self):
         """ Cambia a la línea anterior """
+        self.guardar_traduccion()
         if self.indice_linea > 0:
             self.indice_linea -= 1
             self.cargar_linea(self.indice_linea)
@@ -312,6 +313,7 @@ class Dorouh(QWidget):
 
     def linea_siguiente(self):
         """ Cambia a la línea siguiente """
+        self.guardar_traduccion()
         if self.indice_linea < len(self.indices_comentarios) - 1:
             self.indice_linea += 1
             self.cargar_linea(self.indice_linea)
