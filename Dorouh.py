@@ -1,5 +1,6 @@
 import sys
 import os
+import io
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel, QTextEdit, QHBoxLayout, QMessageBox, QLineEdit
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QIcon
@@ -198,7 +199,7 @@ class Dorouh(QWidget):
     def cargar_archivo(self, archivo):
         """ Carga el contenido del archivo y extrae los comentarios con el patrón '#' """
         try:
-            with open(archivo, 'r', encoding='utf-8') as f:
+            with io.open(archivo, 'r', newline='', encoding='utf-8') as f:
                 self.lineas = f.readlines()
 
             # Identifica las líneas que contienen comentarios válidos
@@ -293,7 +294,7 @@ class Dorouh(QWidget):
 
 
             # Reescribe el archivo con las líneas modificadas, asegurándose de que solo se modifique la línea correcta
-            with open(self.ruta_archivo, 'w', encoding='utf-8') as f:
+            with io.open(self.ruta_archivo, 'w', newline='', encoding='utf-8') as f:
                 f.writelines(self.lineas)
 
         except Exception as e:
