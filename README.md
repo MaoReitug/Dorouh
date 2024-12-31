@@ -14,9 +14,63 @@ To run the program, it must be executed from a terminal within your editor or di
 
 ---
 
+**ES**  
+
+ahora cuenta con un instalador de librerias y un archivo para ejecutar el programa mas rapido.
+
+ejecutablet1.bat como un .exe
+
+instalarpyqt.bat para instalar las librerias mas facil.
+
+
+
+**EN**  
+
+Now it comes with a library installer and a file to run the program faster.
+
+ejecutablet1.bat like a .exe
+
+instalarpyqt.bat a installer for librerys.
+
+
+
 ## Requisitos | Requirements
 
 - **Python 3.8 o superior**  
 - **PyQt5**  
 
 ---
+
+
+## Tested on:
+
+- Windows 11
+- Linux 
+
+
+
+
+
+
+
+## Future ideas | Ideas a futuro
+
+
+**ES**  
+Boton para traducir de forma automatica.
+
+**EN**  
+automatic translate button.
+
+
+
+
+
+
+## Special Thanks
+
+-Ningusta (Testing, Contributions, Linux compatibility)
+
+
+
+
