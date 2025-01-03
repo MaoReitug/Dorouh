@@ -1,9 +1,18 @@
 import sys
 import os
 import io
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel, QTextEdit, QHBoxLayout, QMessageBox, QLineEdit
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel, QTextEdit, QHBoxLayout, QMessageBox, QLineEdit)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QIcon
+
+class NoMasColores(QTextEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def insertFromMimeData(self, source):
+        """Sobrescribe el método para pegar solo texto sin formato."""
+        if source.hasText():
+            self.insertPlainText(source.text())
 
 class Dorouh(QWidget):
     def __init__(self):
@@ -43,7 +52,7 @@ class Dorouh(QWidget):
                 'error_no_archivo': "No hay archivo cargado para guardar.",
                 'es': "Español",
                 'en': "Inglés",
-                'buscar_linea': "Buscar línea..."  # <-- Agregar esta línea
+                'buscar_linea': "Buscar línea..."
             },
             'en': {
                 'buscar_archivo': "Search file",
@@ -59,10 +68,9 @@ class Dorouh(QWidget):
                 'error_no_archivo': "No file loaded to save.",
                 'es': "Spanish",
                 'en': "English",
-                'buscar_linea': "Search line..."  # <-- Agregar esta línea
+                'buscar_linea': "Search line..."
             }
         }
-
 
         self.initUI()
 
@@ -90,14 +98,14 @@ class Dorouh(QWidget):
         # Botón para cambiar idioma
         self.boton_idioma = QPushButton(self.traducciones[self.idioma][self.idioma], self)
         self.boton_idioma.setStyleSheet(self.boton_estilo())
-        self.boton_idioma.setFixedWidth(100)  # Hacer el botón más pequeño
+        self.boton_idioma.setFixedWidth(100)
         self.boton_idioma.clicked.connect(self.cambiar_idioma)
         top_layout.addWidget(self.boton_idioma, alignment=Qt.AlignCenter)
 
         layout.addLayout(top_layout)
 
         # Área para mostrar el texto seleccionado para traducir
-        self.texto_seleccionable = QTextEdit(self)
+        self.texto_seleccionable = NoMasColores(self)
         self.texto_seleccionable.setFont(QFont('Arial', 12))
         self.texto_seleccionable.setReadOnly(True)
         self.texto_seleccionable.setStyleSheet("QTextEdit { border: 1px solid #ccc; border-radius: 5px; padding: 5px; height: 80px; }")
@@ -105,11 +113,10 @@ class Dorouh(QWidget):
 
         # Barra de búsqueda para línea
         self.buscador = QLineEdit(self)
-        self.buscador.setPlaceholderText(self.traducciones[self.idioma]['buscar_linea'])  # <-- Aquí se actualiza el texto
+        self.buscador.setPlaceholderText(self.traducciones[self.idioma]['buscar_linea'])
         self.buscador.setStyleSheet("QLineEdit { font-size: 14px; padding: 5px; border: 1px solid #ccc; border-radius: 5px; }")
         self.buscador.returnPressed.connect(self.buscar_por_linea)
         layout.addWidget(self.buscador)
-
 
         # Botón para copiar el texto seleccionado
         self.boton_copiar = QPushButton(self.traducciones[self.idioma]['copiar'], self)
@@ -118,7 +125,7 @@ class Dorouh(QWidget):
         layout.addWidget(self.boton_copiar)
 
         # Área para mostrar la traducción
-        self.cuadro_traduccion = QTextEdit(self)
+        self.cuadro_traduccion = NoMasColores(self)
         self.cuadro_traduccion.setFont(QFont('Arial', 12))
         self.cuadro_traduccion.setStyleSheet("QTextEdit { border: 1px solid #ccc; border-radius: 5px; padding: 5px; height: 80px; }")
         layout.addWidget(self.cuadro_traduccion)
