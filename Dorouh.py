@@ -251,6 +251,7 @@ class Dorouh(QWidget):
         self.boton_copiar.setText(self.traducciones[self.idioma]['copiar'])
         self.boton_guardar.setText(self.traducciones[self.idioma]['guardar'])
         self.boton_anterior.setText(self.traducciones[self.idioma]['anterior'])
+        self.boton_siguiente.setText(self.traducciones[self.idioma]['siguiente'])
         self.boton_siguiente
         self.boton_idioma.setText(self.traducciones[self.idioma][self.idioma])
         
