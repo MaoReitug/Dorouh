@@ -53,6 +53,40 @@ instalarpyqt.bat a installer for librerys.
 
 
 
+
+
+## 1.1 update
+
+
+![image](https://github.com/user-attachments/assets/74dbc7bb-2b34-4a22-a74c-f4c6d2c5b6a3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Future ideas | Ideas a futuro
 
 
