@@ -4,6 +4,8 @@ import io
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel, QTextEdit, QHBoxLayout, QMessageBox, QLineEdit)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QIcon
+from configs import IDIOMAS, idiomaX, Config, boton, fondoC
+
 
 class NoMasColores(QTextEdit):
     def __init__(self, parent=None):
@@ -25,7 +27,7 @@ class Dorouh(QWidget):
         self.setWindowIcon(QIcon(os.path.join(directorio_actual, 'icon.png')))
 
         # Definir el título y tamaño de la ventana
-        self.setWindowTitle("Traductor v1")
+        self.setWindowTitle("Traductor v1.1")
         self.setGeometry(100, 100, 800, 600)
 
         # Inicialización de variables
@@ -34,43 +36,10 @@ class Dorouh(QWidget):
         self.indice_linea = 0
         self.indices_comentarios = []
         self.ruta_archivo = None
-        self.idioma = 'es'  # Idioma predeterminado (español)
+        self.idioma = idiomaX  # Idioma predeterminado (español)
 
         # Diccionario de traducciones para español e inglés
-        self.traducciones = {
-            'es': {
-                'buscar_archivo': "Buscar archivo",
-                'copiar': "Copiar",
-                'guardar': "Guardar",
-                'anterior': "Anterior",
-                'siguiente': "Siguiente",
-                'archivo_seleccionado': "Archivo seleccionado: ",
-                'ningun_archivo': "No se seleccionó ningún archivo.",
-                'no_comentarios': "No se encontraron comentarios con el patrón # \"",
-                'error_lectura': "No se pudo leer el archivo: ",
-                'error_guardar': "No se pudo guardar la traducción: ",
-                'error_no_archivo': "No hay archivo cargado para guardar.",
-                'es': "Español",
-                'en': "Inglés",
-                'buscar_linea': "Buscar línea..."
-            },
-            'en': {
-                'buscar_archivo': "Search file",
-                'copiar': "Copy",
-                'guardar': "Save",
-                'anterior': "Previous",
-                'siguiente': "Next",
-                'archivo_seleccionado': "File selected: ",
-                'ningun_archivo': "No file selected.",
-                'no_comentarios': "No comments found with the pattern # \"",
-                'error_lectura': "Could not read the file: ",
-                'error_guardar': "Could not save the translation: ",
-                'error_no_archivo': "No file loaded to save.",
-                'es': "Spanish",
-                'en': "English",
-                'buscar_linea': "Search line..."
-            }
-        }
+        self.traducciones = IDIOMAS
 
         self.initUI()
 
@@ -79,6 +48,33 @@ class Dorouh(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(15)
+        
+        # Variable para rastrear el estado del tema
+        self.tema_oscuro = False
+        
+        """ Aplica el estilo con el color de fondo desde el diccionario FondoC """
+        self.setStyleSheet(f"""
+            QWidget {{
+                background-color: {fondoC['fondoC']};    /* Fondo de la ventana desde FondoC */
+                color: black;                             /* Texto negro */
+            }}
+            QLabel {{
+                color: black;                             /* Texto de las etiquetas en negro */
+            }}
+            QLineEdit, QTextEdit {{
+                background-color: #f5f5f5;                /* Gris claro para cuadros de texto */
+                border: 1px solid #ccc;                   /* Borde gris claro */
+                border-radius: 5px;                       /* Bordes redondeados */
+                padding: 5px;
+            }}
+            QLineEdit:focus, QTextEdit:focus {{
+                border: 1px solid #4CAF50;                /* Borde verde cuando está en foco */
+                background-color: white;                  /* Fondo blanco cuando está en foco */
+            }}
+        """)
+
+
+     
 
         # Barra superior
         top_layout = QHBoxLayout()
@@ -95,13 +91,28 @@ class Dorouh(QWidget):
         self.boton_buscar.clicked.connect(self.seleccionar_archivo)
         top_layout.addWidget(self.boton_buscar)
 
+        # Crear un layout horizontal solo para los botones de idioma y tema
+        idioma_tema_layout = QHBoxLayout()
+        idioma_tema_layout.setSpacing(10)  # Sin espacio entre los botones
+
         # Botón para cambiar idioma
         self.boton_idioma = QPushButton(self.traducciones[self.idioma][self.idioma], self)
         self.boton_idioma.setStyleSheet(self.boton_estilo())
         self.boton_idioma.setFixedWidth(100)
         self.boton_idioma.clicked.connect(self.cambiar_idioma)
-        top_layout.addWidget(self.boton_idioma, alignment=Qt.AlignCenter)
+        idioma_tema_layout.addWidget(self.boton_idioma)
 
+        # Botón de ejemplo para cambiar de tema
+        self.boton_tema = QPushButton(self.traducciones[self.idioma]['Tema'], self)
+        self.boton_tema.setStyleSheet(self.boton_estilo())
+        self.boton_tema.setFixedWidth(100)
+        self.boton_tema.clicked.connect(self.cambiar_tema)
+        idioma_tema_layout.addWidget(self.boton_tema)
+
+        # Agregar el layout de idioma y tema al layout principal
+        top_layout.addLayout(idioma_tema_layout)
+
+        # Asignar el layout a tu widget principal (por ejemplo, a la ventana)
         layout.addLayout(top_layout)
 
         # Área para mostrar el texto seleccionado para traducir
@@ -153,27 +164,83 @@ class Dorouh(QWidget):
         self.boton_siguiente.setStyleSheet(self.boton_estilo())
         self.boton_siguiente.clicked.connect(self.linea_siguiente)
         boton_layout.addWidget(self.boton_siguiente)
+        
+
+        # Etiqueta para mostrar el progreso de traducción
+        progreso_layout = QHBoxLayout()
+
+        self.etiqueta_progreso = QLabel("N/a")
+        self.etiqueta_progreso.setFont(QFont('Arial', 12))
+        self.etiqueta_progreso.setAlignment(Qt.AlignLeft)
+        progreso_layout.addWidget(self.etiqueta_progreso)
+
+        self.boton_ir_vacias = QPushButton(self.traducciones[self.idioma]['ir_a_vacias'], self)
+        self.boton_ir_vacias.setStyleSheet(self.boton_estilo())
+        self.boton_ir_vacias.clicked.connect(self.ir_a_linea_vacia)
+        progreso_layout.addWidget(self.boton_ir_vacias)
+        
+
+        layout.addLayout(progreso_layout)
+
 
         layout.addLayout(boton_layout)
         self.setLayout(layout)
 
+
+
+
+
+    def cambiar_tema(self):
+            """Alterna entre tema oscuro y claro."""
+            self.tema_oscuro = not self.tema_oscuro
+            self.aplicar_tema()
+
+    def aplicar_tema(self):
+            """Aplica el tema actual basado en la configuración."""
+            tema = Config.tema_oscuro() if self.tema_oscuro else Config.tema_claro()
+
+            # Aplica los estilos al fondo y texto
+            self.setStyleSheet(f"background-color: {tema['background_color']}; color: {tema['text_color']};")
+
+            # Actualiza los estilos de los botones
+            self.boton_tema.setStyleSheet(tema["button_style"])
+            
+            
     def boton_estilo(self):
         """ Define el estilo de los botones """
-        return """
-            QPushButton {
-                background-color: #4CAF50;
+        # Usamos el diccionario 'boton' para acceder a los colores dinámicamente
+        return f"""
+            QPushButton {{
+                background-color: {boton['boton']};
                 color: white;
                 font-size: 14px;
                 padding: 10px;
                 border-radius: 5px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-            QPushButton:disabled {
+            }}
+            QPushButton:hover {{
+                background-color: {boton['botonb']};
+            }}
+            QPushButton:disabled {{
                 background-color: #ccc;
-            }
+            }}
         """
+
+
+    def ir_a_linea_vacia(self):
+        """Salta a la primera línea vacía detectada."""
+        if not hasattr(self, 'lineas') or not self.lineas:
+            QMessageBox.warning(self, self.traducciones[self.idioma]['error'], self.traducciones[self.idioma]['archivo_no_cargado'])
+            return
+
+        if self.lineas_vacias:
+            linea_vacia = self.lineas_vacias[0] - 1  # Convertir a índice
+            if linea_vacia in self.indices_comentarios:
+                self.indice_linea = self.indices_comentarios.index(linea_vacia)
+                self.cargar_linea(self.indice_linea)
+                self.actualizar_botones()
+        else:
+            QMessageBox.information(self, self.traducciones[self.idioma]['sin_lineas_vacias'], self.traducciones[self.idioma]['sin_lineas_vacias'])
+
 
     def cambiar_idioma(self):
         """ Cambia el idioma de la interfaz entre español e inglés """
@@ -184,14 +251,23 @@ class Dorouh(QWidget):
         self.boton_copiar.setText(self.traducciones[self.idioma]['copiar'])
         self.boton_guardar.setText(self.traducciones[self.idioma]['guardar'])
         self.boton_anterior.setText(self.traducciones[self.idioma]['anterior'])
-        self.boton_siguiente.setText(self.traducciones[self.idioma]['siguiente'])
+        self.boton_siguiente
         self.boton_idioma.setText(self.traducciones[self.idioma][self.idioma])
+        
+        
+        
+        self.boton_ir_vacias.setText(self.traducciones[self.idioma]['ir_a_vacias'])
+        self.boton_tema.setText(self.traducciones[self.idioma]['Tema'])
+        
 
         # Actualiza la etiqueta del archivo seleccionado
         self.etiqueta_archivo.setText(f"{self.traducciones[self.idioma]['archivo_seleccionado']} {os.path.basename(self.ruta_archivo) if self.ruta_archivo else self.traducciones[self.idioma]['ningun_archivo']}")
 
         # Actualiza el texto del buscador
         self.buscador.setPlaceholderText(self.traducciones[self.idioma]['buscar_linea'])  # <-- Actualización aquí
+        
+        
+        
 
     def seleccionar_archivo(self):
         """ Abre un cuadro de diálogo para seleccionar un archivo """
@@ -202,16 +278,40 @@ class Dorouh(QWidget):
             self.cargar_archivo(archivo)
         else:
             self.etiqueta_archivo.setText(self.traducciones[self.idioma]['ningun_archivo'])
+            
+    def actualizar_progreso(self):
+        """Actualiza la etiqueta de progreso traducidas/total y detecta líneas vacías."""
+        self.traducidas = sum(
+            1 for i in self.indices_comentarios
+            if i + 1 < len(self.lineas) and '"' in self.lineas[i + 1] and self.lineas[i + 1].split('"')[1].strip()
+        )
+        self.lineas_vacias = [
+            i + 1 for i in self.indices_comentarios
+            if i + 1 < len(self.lineas) and '"' in self.lineas[i + 1] and not self.lineas[i + 1].split('"')[1].strip()
+        ]
+        self.etiqueta_progreso.setText(f"{self.traducidas}/{len(self.indices_comentarios)}")
+
 
     def cargar_archivo(self, archivo):
-        """ Carga el contenido del archivo y extrae los comentarios con el patrón '#' """
         try:
             with io.open(archivo, 'r', newline='', encoding='utf-8') as f:
                 self.lineas = f.readlines()
 
-            # Identifica las líneas que contienen comentarios válidos
-            self.indices_comentarios = [i for i, linea in enumerate(self.lineas) if '#' in linea and '"' in linea.split('#', 1)[1]]
+            self.indices_comentarios = [
+                i for i, linea in enumerate(self.lineas)
+                if ('#' in linea and '"' in linea.split('#', 1)[1]) or linea.strip().startswith('old "')
+            ]
             self.indice_linea = 0
+
+            # Contar líneas traducidas
+            self.traducidas = sum(
+                1 for i in self.indices_comentarios
+                if i + 1 < len(self.lineas) and '"' in self.lineas[i + 1] and self.lineas[i + 1].split('"')[1].strip()
+            )
+            self.total_a_traducir = len(self.indices_comentarios)
+
+            # Actualizar progreso
+            self.actualizar_progreso()
 
             if self.indices_comentarios:
                 self.cargar_linea(self.indice_linea)
@@ -221,44 +321,47 @@ class Dorouh(QWidget):
         except Exception as e:
             QMessageBox.critical(self, self.traducciones[self.idioma]['error_lectura'], f"{self.traducciones[self.idioma]['error_lectura']} {e}")
 
+
     def cargar_linea(self, indice):
-        """ Carga una línea específica con el comentario y su traducción """
+        """ Carga una línea específica con el comentario o texto 'old' y su traducción """
         if 0 <= indice < len(self.indices_comentarios):
             indice_comentario = self.indices_comentarios[indice]
             linea_comentario = self.lineas[indice_comentario].strip()
 
-            # Extrae el texto después del comentario '#'
+            # Procesa la línea si es un comentario o línea old
+            texto_con_numero_linea = ''
             if '#' in linea_comentario:
                 comentario = linea_comentario.split('#', 1)[1].strip()
-                
-                # Buscar la primera y última comilla (") en el comentario
-                comillas = [i for i, c in enumerate(comentario) if c == '"']
-                
-                if len(comillas) >= 2:
-                    # Obtenemos el texto entre la primera y última comilla
-                    texto = comentario[comillas[0] + 1:comillas[-1]]
-                    
-                    # Detecta si hay una letra antes de las comillas
-                    letra = comentario[0] if comentario[0].isalpha() else ""
-                    texto_con_numero_linea = f"{indice_comentario + 1} {letra}: {texto} "
-                else:
-                    texto_con_numero_linea = f"{indice_comentario + 1}: {comentario} "
-            else:
-                texto_con_numero_linea = f"{indice_comentario + 1}:"
+                texto_con_numero_linea = self.procesar_comentario(comentario, indice_comentario)
+            elif linea_comentario.startswith('old "'):
+                texto_con_numero_linea = self.procesar_old(linea_comentario, indice_comentario)
 
             # Actualiza el área de texto seleccionable y la traducción
             traduccion = ''
             if indice_comentario + 1 < len(self.lineas):
                 linea_traduccion = self.lineas[indice_comentario + 1].strip()
-                
-                # Buscar la primera y última comilla (") en la traducción
                 comillas_traduccion = [i for i, c in enumerate(linea_traduccion) if c == '"']
-                
                 if len(comillas_traduccion) >= 2:
-                    # Obtenemos el texto entre la primera y última comilla en la traducción
                     traduccion = linea_traduccion[comillas_traduccion[0] + 1:comillas_traduccion[-1]]
-                
-            self.actualizar_texto_traducir(texto_con_numero_linea, traduccion)  
+
+            self.actualizar_texto_traducir(texto_con_numero_linea, traduccion)
+
+    def procesar_comentario(self, comentario, indice_comentario):
+        """ Procesa un comentario extraído de una línea con '#' """
+        comillas = [i for i, c in enumerate(comentario) if c == '"']
+        if len(comillas) >= 2:
+            texto = comentario[comillas[0] + 1:comillas[-1]]
+            letra = comentario[0] if comentario[0].isalpha() else ""
+            return f"{indice_comentario + 1} {letra}: {texto} "
+        return f"{indice_comentario + 1}: {comentario} "
+
+    def procesar_old(self, linea_comentario, indice_comentario):
+        """ Procesa una línea que comienza con 'old' """
+        comillas = [i for i, c in enumerate(linea_comentario) if c == '"']
+        if len(comillas) >= 2:
+            texto = linea_comentario[comillas[0] + 1:comillas[-1]]
+            return f"{indice_comentario + 1} old: {texto} "
+        return f"{indice_comentario + 1}: {linea_comentario}"
 
 
 
@@ -275,7 +378,6 @@ class Dorouh(QWidget):
         QApplication.clipboard().setText(texto_sin_numero)
 
     def guardar_traduccion(self):
-        """ Guarda la traducción en el archivo seleccionado """
         if not self.ruta_archivo:
             QMessageBox.critical(self, self.traducciones[self.idioma]['error_no_archivo'], self.traducciones[self.idioma]['error_no_archivo'])
             return
@@ -284,29 +386,27 @@ class Dorouh(QWidget):
             indice_comentario = self.indices_comentarios[self.indice_linea]
             traduccion = self.cuadro_traduccion.toPlainText().strip()
 
-            # Si hay una línea a traducir
             if indice_comentario + 1 < len(self.lineas) and '"' in self.lineas[indice_comentario + 1]:
                 linea = self.lineas[indice_comentario + 1]
-                
-                # Buscar la primera comilla
                 comillas_abiertas = linea.find('"')
-                
-                # Buscar la última comilla
                 comillas_cerradas = linea.rfind('"')
 
-                # Verificar que ambas comillas existen
                 if comillas_abiertas != -1 and comillas_cerradas != -1 and comillas_abiertas < comillas_cerradas:
-                    # Reemplazar el contenido entre la primera y la última comilla con la traducción
-                    self.lineas[indice_comentario + 1] = f'{linea[:comillas_abiertas + 1]}{traduccion}{linea[comillas_cerradas:]}'
+                    contenido_actual = linea[comillas_abiertas + 1:comillas_cerradas].strip()
+                    if not contenido_actual and traduccion:  # Si estaba vacío y se pone una traducción, incrementamos
+                        self.traducidas += 1
+                    elif contenido_actual and not traduccion:  # Si se borra la traducción, decrementamos
+                        self.traducidas -= 1
 
+                    self.lineas[indice_comentario + 1] = f'{linea[:comillas_abiertas + 1]}{traduccion}{linea[comillas_cerradas:]}'  # Actualizar la línea
 
-            # Reescribe el archivo con las líneas modificadas, asegurándose de que solo se modifique la línea correcta
             with io.open(self.ruta_archivo, 'w', newline='', encoding='utf-8') as f:
                 f.writelines(self.lineas)
 
+            self.actualizar_progreso()  # Actualizar progreso después de guardar
+
         except Exception as e:
             QMessageBox.critical(self, self.traducciones[self.idioma]['error_guardar'], f"{self.traducciones[self.idioma]['error_guardar']} {e}")
-
 
 
 
