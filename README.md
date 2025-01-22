@@ -61,11 +61,40 @@ instalarpyqt.bat a installer for librerys.
 ![image](https://github.com/user-attachments/assets/74dbc7bb-2b34-4a22-a74c-f4c6d2c5b6a3)
 
 
+**Es**
+Ahora el programa cuenta con un cambio de estilo, claro y oscuro.
+
+**EN**
+The program now includes a style switcher, light and dark mode.
 
 
+![image](https://github.com/user-attachments/assets/8e0e2975-7ded-4070-b86f-e50b8baf421a)
 
 
+**ES**
+A la par de añadir un botón para ir a líneas vacías en el archivo a traducir. Esto sirve para buscar líneas mal hechas o vacías, o simplemente ir a la última línea en orden para ahorrar tiempo.
 
+**EN**
+In addition to adding a button to go to empty lines in the file to be translated. This is useful for finding poorly formatted or empty lines, or simply going to the last line in order to save time.
+
+
+![image](https://github.com/user-attachments/assets/c1b46e28-59b4-4fee-a058-2f396f3f606e)
+
+**ES**
+También se cuenta con un contador de líneas hechas y restantes, para llevar un mejor conteo de líneas.
+
+**EN**
+It also includes a counter for completed and remaining lines, to keep better track of the lines.
+
+compatible con: / Compatible with:
+
+# "hello"
+"hola"
+
+y 
+
+old "hola"
+new "hello"
 
 
 
