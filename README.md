@@ -88,13 +88,7 @@ It also includes a counter for completed and remaining lines, to keep better tra
 
 compatible con: / Compatible with:
 
-# "hello"
-"hola"
-
-y 
-
-old "hola"
-new "hello"
+![image](https://github.com/user-attachments/assets/5f9cd817-5e93-428d-aa7f-0fa104c469c1)
 
 
 
