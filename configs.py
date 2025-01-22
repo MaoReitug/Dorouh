@@ -46,6 +46,8 @@ IDIOMAS = {
 }
 
 
+
+
 # configs.py
 
 class Config:
@@ -74,7 +76,7 @@ class Config:
     @staticmethod
     def tema_claro():
         return {
-            "background_color": "white",
+            "background_color": fondoC['fondoC'],
             "text_color": "black",
             "button_style": """
                 QPushButton {
