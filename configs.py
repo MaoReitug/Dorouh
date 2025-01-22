@@ -51,53 +51,70 @@ IDIOMAS = {
 # configs.py
 
 class Config:
+    
     @staticmethod
-    def tema_oscuro():
+    def tema_oscuro(caracas):
         return {
-            "background_color": "#1E1E1E",
+            "background_color": caracas['fondo'],
             "text_color": "white",
-            "button_style": """
-                QPushButton {
-                    background-color: #2E2E2E;
+            "button_style": f"""
+                QPushButton {{
+                    background-color: {caracas['boton']};
                     color: white;
                     font-size: 14px;
                     padding: 10px;
                     border-radius: 5px;
-                }
-                QPushButton:hover {
-                    background-color: #3E3E3E;
-                }
-                QPushButton:disabled {
+                }}
+                QPushButton:hover {{
+                    background-color: {caracas['botonb']};
+                }}
+                QPushButton:disabled {{
                     background-color: #555;
-                }
+                }}
             """
         }
 
     @staticmethod
-    def tema_claro():
+    def tema_claro(caracas):
         return {
-            "background_color": fondoC['fondoC'],
+            "background_color": caracas['fondo'],
             "text_color": "black",
-            "button_style": """
-                QPushButton {
-                    background-color: #4CAF50;
+            "button_style": f"""
+                QPushButton {{
+                    background-color: {caracas['boton']};
                     color: white;
                     font-size: 14px;
                     padding: 10px;
                     border-radius: 5px;
-                }
-                QPushButton:hover {
-                    background-color: #45a049;
-                }
-                QPushButton:disabled {
+                }}
+                QPushButton:hover {{
+                    background-color: {caracas['botonb']};
+                }}
+                QPushButton:disabled {{
                     background-color: #ccc;
-                }
+                }}
             """
         }
 
-
-
-
+    @staticmethod
+    def boton_estilo(caracas):
+        """ Define el estilo de los botones """
+        # Usamos el diccionario 'boton' para acceder a los colores dinámicamente
+        return f"""
+            QPushButton {{
+                background-color: {caracas["boton"]};
+                color: white;
+                font-size: 14px;
+                padding: 10px;
+                border-radius: 5px;
+            }}
+            QPushButton:hover {{
+                background-color: {caracas["botonb"]};
+            }}
+            QPushButton:disabled {{
+                background-color: #ccc;
+            }}
+        """
 
 
 
@@ -117,19 +134,28 @@ class Config:
 ####### Configuraciones / Configurations ###########
 
 
-#### color botones / Color Buttons
-boton = {
+
+
+coloresClaros = {
+
+    #### color botones / Color Buttons
     'boton' : '#4CAF50',
-    'botonb' : '#45a049'
+    'botonb' : '#45a049',
 
+    #### fondo / Background
+    'fondo' : '#ebebeb'
 }
 
+coloresOscuros = {
 
-#### fondo / Background
-fondoC = {
-    'fondoC' : '#ebebeb'
+    #### color botones / Color Buttons
+    'boton' : '#898ED6',
+    'botonb' : '#6C70A8',
 
+    #### fondo / Background
+    'fondo' : '#1E1E1E'
 }
+
 
 
 #### idioma / language

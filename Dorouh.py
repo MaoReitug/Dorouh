@@ -4,7 +4,7 @@ import io
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel, QTextEdit, QHBoxLayout, QMessageBox, QLineEdit)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QIcon
-from configs import IDIOMAS, idiomaX, Config, boton, fondoC
+from configs import *
 
 
 class NoMasColores(QTextEdit):
@@ -55,7 +55,7 @@ class Dorouh(QWidget):
         """ Aplica el estilo con el color de fondo desde el diccionario FondoC """
         self.setStyleSheet(f"""
             QWidget {{
-                background-color: {fondoC['fondoC']};    /* Fondo de la ventana desde FondoC */
+                background-color: {coloresClaros['fondo']};    /* Fondo de la ventana desde FondoC */
                 color: black;                             /* Texto negro */
             }}
             QLabel {{
@@ -74,8 +74,6 @@ class Dorouh(QWidget):
         """)
 
 
-     
-
         # Barra superior
         top_layout = QHBoxLayout()
 
@@ -87,7 +85,7 @@ class Dorouh(QWidget):
 
         # Botón para buscar un archivo
         self.boton_buscar = QPushButton(self.traducciones[self.idioma]['buscar_archivo'], self)
-        self.boton_buscar.setStyleSheet(self.boton_estilo())
+        self.boton_buscar.setStyleSheet(Config.boton_estilo(coloresClaros))
         self.boton_buscar.clicked.connect(self.seleccionar_archivo)
         top_layout.addWidget(self.boton_buscar)
 
@@ -97,14 +95,14 @@ class Dorouh(QWidget):
 
         # Botón para cambiar idioma
         self.boton_idioma = QPushButton(self.traducciones[self.idioma][self.idioma], self)
-        self.boton_idioma.setStyleSheet(self.boton_estilo())
+        self.boton_idioma.setStyleSheet(Config.boton_estilo(coloresClaros))
         self.boton_idioma.setFixedWidth(100)
         self.boton_idioma.clicked.connect(self.cambiar_idioma)
         idioma_tema_layout.addWidget(self.boton_idioma)
 
         # Botón de ejemplo para cambiar de tema
         self.boton_tema = QPushButton(self.traducciones[self.idioma]['Tema'], self)
-        self.boton_tema.setStyleSheet(self.boton_estilo())
+        self.boton_tema.setStyleSheet(Config.boton_estilo(coloresClaros))
         self.boton_tema.setFixedWidth(100)
         self.boton_tema.clicked.connect(self.cambiar_tema)
         idioma_tema_layout.addWidget(self.boton_tema)
@@ -131,7 +129,7 @@ class Dorouh(QWidget):
 
         # Botón para copiar el texto seleccionado
         self.boton_copiar = QPushButton(self.traducciones[self.idioma]['copiar'], self)
-        self.boton_copiar.setStyleSheet(self.boton_estilo())
+        self.boton_copiar.setStyleSheet(Config.boton_estilo(coloresClaros))
         self.boton_copiar.clicked.connect(self.copiar_texto)
         layout.addWidget(self.boton_copiar)
 
@@ -147,21 +145,21 @@ class Dorouh(QWidget):
         # Botón para ir a la línea anterior
         self.boton_anterior = QPushButton(self.traducciones[self.idioma]['anterior'], self)
         self.boton_anterior.setEnabled(False)
-        self.boton_anterior.setStyleSheet(self.boton_estilo())
+        self.boton_anterior.setStyleSheet(Config.boton_estilo(coloresClaros))
         self.boton_anterior.clicked.connect(self.linea_anterior)
         boton_layout.addWidget(self.boton_anterior)
 
         # Botón para guardar la traducción
         self.boton_guardar = QPushButton(self.traducciones[self.idioma]['guardar'], self)
         self.boton_guardar.setEnabled(False)
-        self.boton_guardar.setStyleSheet(self.boton_estilo())
+        self.boton_guardar.setStyleSheet(Config.boton_estilo(coloresClaros))
         self.boton_guardar.clicked.connect(self.guardar_traduccion)
         boton_layout.addWidget(self.boton_guardar)
 
         # Botón para ir a la línea siguiente
         self.boton_siguiente = QPushButton(self.traducciones[self.idioma]['siguiente'], self)
         self.boton_siguiente.setEnabled(False)
-        self.boton_siguiente.setStyleSheet(self.boton_estilo())
+        self.boton_siguiente.setStyleSheet(Config.boton_estilo(coloresClaros))
         self.boton_siguiente.clicked.connect(self.linea_siguiente)
         boton_layout.addWidget(self.boton_siguiente)
         
@@ -175,7 +173,7 @@ class Dorouh(QWidget):
         progreso_layout.addWidget(self.etiqueta_progreso)
 
         self.boton_ir_vacias = QPushButton(self.traducciones[self.idioma]['ir_a_vacias'], self)
-        self.boton_ir_vacias.setStyleSheet(self.boton_estilo())
+        self.boton_ir_vacias.setStyleSheet(Config.boton_estilo(coloresClaros))
         self.boton_ir_vacias.clicked.connect(self.ir_a_linea_vacia)
         progreso_layout.addWidget(self.boton_ir_vacias)
         
@@ -197,33 +195,31 @@ class Dorouh(QWidget):
 
     def aplicar_tema(self):
             """Aplica el tema actual basado en la configuración."""
-            tema = Config.tema_oscuro() if self.tema_oscuro else Config.tema_claro()
+            
+            if self.tema_oscuro:
+                tema = Config.tema_oscuro(coloresOscuros)
+                self.cuadro_traduccion.setStyleSheet(f"background-color: black;")
+                self.texto_seleccionable.setStyleSheet(f"background-color: black;")
+                self.buscador.setStyleSheet(f"background-color: black;")
+            else:
+                tema = Config.tema_claro(coloresClaros)
+                self.cuadro_traduccion.setStyleSheet(f"background-color: #f5f5f5;")
+                self.texto_seleccionable.setStyleSheet(f"background-color: #f5f5f5;")
+                self.buscador.setStyleSheet(f"background-color: #f5f5f5;")
 
             # Aplica los estilos al fondo y texto
             self.setStyleSheet(f"background-color: {tema['background_color']}; color: {tema['text_color']};")
-
+            
             # Actualiza los estilos de los botones
+            self.boton_buscar.setStyleSheet(tema["button_style"])
+            self.boton_idioma.setStyleSheet(tema["button_style"])
             self.boton_tema.setStyleSheet(tema["button_style"])
-            
-            
-    def boton_estilo(self):
-        """ Define el estilo de los botones """
-        # Usamos el diccionario 'boton' para acceder a los colores dinámicamente
-        return f"""
-            QPushButton {{
-                background-color: {boton['boton']};
-                color: white;
-                font-size: 14px;
-                padding: 10px;
-                border-radius: 5px;
-            }}
-            QPushButton:hover {{
-                background-color: {boton['botonb']};
-            }}
-            QPushButton:disabled {{
-                background-color: #ccc;
-            }}
-        """
+            self.boton_copiar.setStyleSheet(tema["button_style"])
+            self.boton_anterior.setStyleSheet(tema["button_style"])
+            self.boton_siguiente.setStyleSheet(tema["button_style"])
+            self.boton_guardar.setStyleSheet(tema["button_style"])
+            self.boton_ir_vacias.setStyleSheet(tema["button_style"])
+
 
 
     def ir_a_linea_vacia(self):
