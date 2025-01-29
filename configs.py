@@ -53,20 +53,20 @@ IDIOMAS = {
 class Config:
     
     @staticmethod
-    def tema_oscuro(caracas):
+    def tema_oscuro(oscuro):
         return {
-            "background_color": caracas['fondo'],
+            "background_color": oscuro['fondo'],
             "text_color": "white",
             "button_style": f"""
                 QPushButton {{
-                    background-color: {caracas['boton']};
+                    background-color: {oscuro['boton']};
                     color: white;
                     font-size: 14px;
                     padding: 10px;
                     border-radius: 5px;
                 }}
                 QPushButton:hover {{
-                    background-color: {caracas['botonb']};
+                    background-color: {oscuro['botonb']};
                 }}
                 QPushButton:disabled {{
                     background-color: #555;
@@ -75,20 +75,20 @@ class Config:
         }
 
     @staticmethod
-    def tema_claro(caracas):
+    def tema_claro(claro):
         return {
-            "background_color": caracas['fondo'],
+            "background_color": claro['fondo'],
             "text_color": "black",
             "button_style": f"""
                 QPushButton {{
-                    background-color: {caracas['boton']};
+                    background-color: {claro['boton']};
                     color: white;
                     font-size: 14px;
                     padding: 10px;
                     border-radius: 5px;
                 }}
                 QPushButton:hover {{
-                    background-color: {caracas['botonb']};
+                    background-color: {claro['botonb']};
                 }}
                 QPushButton:disabled {{
                     background-color: #ccc;
@@ -97,19 +97,19 @@ class Config:
         }
 
     @staticmethod
-    def boton_estilo(caracas):
+    def boton_estilo(boton):
         """ Define el estilo de los botones """
         # Usamos el diccionario 'boton' para acceder a los colores dinámicamente
         return f"""
             QPushButton {{
-                background-color: {caracas["boton"]};
+                background-color: {boton["boton"]};
                 color: white;
                 font-size: 14px;
                 padding: 10px;
                 border-radius: 5px;
             }}
             QPushButton:hover {{
-                background-color: {caracas["botonb"]};
+                background-color: {boton["botonb"]};
             }}
             QPushButton:disabled {{
                 background-color: #ccc;

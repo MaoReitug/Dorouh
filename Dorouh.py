@@ -194,31 +194,32 @@ class Dorouh(QWidget):
             self.aplicar_tema()
 
     def aplicar_tema(self):
-            """Aplica el tema actual basado en la configuración."""
-            
-            if self.tema_oscuro:
-                tema = Config.tema_oscuro(coloresOscuros)
-                self.cuadro_traduccion.setStyleSheet(f"background-color: black;")
-                self.texto_seleccionable.setStyleSheet(f"background-color: black;")
-                self.buscador.setStyleSheet(f"background-color: black;")
-            else:
-                tema = Config.tema_claro(coloresClaros)
-                self.cuadro_traduccion.setStyleSheet(f"background-color: #f5f5f5;")
-                self.texto_seleccionable.setStyleSheet(f"background-color: #f5f5f5;")
-                self.buscador.setStyleSheet(f"background-color: #f5f5f5;")
+        """Aplica el tema actual basado en la configuración."""
+        
+        if self.tema_oscuro:
+            tema = Config.tema_oscuro(coloresOscuros)
+            self.cuadro_traduccion.setStyleSheet(f"background-color: black; color: white;")
+            self.texto_seleccionable.setStyleSheet(f"background-color: black; color: white;")
 
-            # Aplica los estilos al fondo y texto
-            self.setStyleSheet(f"background-color: {tema['background_color']}; color: {tema['text_color']};")
-            
-            # Actualiza los estilos de los botones
-            self.boton_buscar.setStyleSheet(tema["button_style"])
-            self.boton_idioma.setStyleSheet(tema["button_style"])
-            self.boton_tema.setStyleSheet(tema["button_style"])
-            self.boton_copiar.setStyleSheet(tema["button_style"])
-            self.boton_anterior.setStyleSheet(tema["button_style"])
-            self.boton_siguiente.setStyleSheet(tema["button_style"])
-            self.boton_guardar.setStyleSheet(tema["button_style"])
-            self.boton_ir_vacias.setStyleSheet(tema["button_style"])
+        else:
+            tema = Config.tema_claro(coloresClaros)
+            self.cuadro_traduccion.setStyleSheet(f"background-color: #f5f5f5; color: black; border: 1px solid #888;")
+            self.texto_seleccionable.setStyleSheet(f"background-color: #f5f5f5; color: black; border: 1px solid #888;")
+
+
+        # Aplica los estilos al fondo y texto
+        self.setStyleSheet(f"background-color: {tema['background_color']}; color: {tema['text_color']};")
+        
+        # Actualiza los estilos de los botones
+        self.boton_buscar.setStyleSheet(tema["button_style"])
+        self.boton_idioma.setStyleSheet(tema["button_style"])
+        self.boton_tema.setStyleSheet(tema["button_style"])
+        self.boton_copiar.setStyleSheet(tema["button_style"])
+        self.boton_anterior.setStyleSheet(tema["button_style"])
+        self.boton_siguiente.setStyleSheet(tema["button_style"])
+        self.boton_guardar.setStyleSheet(tema["button_style"])
+        self.boton_ir_vacias.setStyleSheet(tema["button_style"])
+
 
 
 
