@@ -19,7 +19,9 @@ IDIOMAS = {
         'sin_lineas_vacias': 'No se encontraron líneas vacías.',
         'error': 'Error',
         'archivo_no_cargado': 'No se ha cargado un archivo. Por favor, cargue un archivo primero.',
-        'Tema': 'Tema'
+        'Tema': 'Tema',
+        'Auto_Rellenar': "Auto Rellenar",
+        'Recargar': "Recargar"
 
     },
     'en': {
@@ -41,7 +43,9 @@ IDIOMAS = {
         'sin_lineas_vacias': 'No empty lines found.',
         'error': 'Error',
         'archivo_no_cargado': 'No file loaded. Please load a file first.',
-        'Tema': 'Theme'
+        'Tema': 'Theme',
+        'Auto_Rellenar': "auto line",
+        'Recargar': "Reload"
     }
 }
 
