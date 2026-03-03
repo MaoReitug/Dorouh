@@ -12,32 +12,6 @@ Dorouh is a program created to facilitate the translation of Ren'Py files, provi
 
 To run the program, it must be executed from a terminal within your editor or directly from the system terminal.
 
----
-
-**ES**  
-
-ahora cuenta con un instalador de librerias y un archivo para ejecutar el programa mas rapido.
-
-ejecutablet1.bat como un .exe
-
-instalarpyqt.bat para instalar las librerias mas facil.
-
-
-
-**EN**  
-
-Now it comes with a library installer and a file to run the program faster.
-
-ejecutablet1.bat like a .exe
-
-instalarpyqt.bat a installer for librerys.
-
-
-
-## Requisitos | Requirements
-
-- **Python 3.8 o superior**  
-- **PyQt5**  
 
 ---
 
@@ -92,19 +66,30 @@ compatible con: / Compatible with:
 
 
 
+**ES**
+
+## 3.0 update
+
+
+<img width="992" height="770" alt="image" src="https://github.com/user-attachments/assets/46a16b6b-296e-444e-9750-4e467d80949b" />
+
+-Interfaz mas comoda.
+-Selector de Backups.
+-sistema de selector de linea duplicadas "auto/auto fill"
+-ver todas las lineas
+-ir a lineas vacias.
+
+**EN**
+
+-More user-friendly interface.
+-Backup selector.
+-Duplicate line selector system “auto/auto fill.”
+-View all lines.
+-Go to empty lines.
 
 
 
-
-
-
-
-
-
-
-
-
-
+<img width="305" height="360" alt="image" src="https://github.com/user-attachments/assets/381e47a2-21bb-4d40-81e5-40ad628fe537" />
 
 
 
@@ -112,12 +97,6 @@ compatible con: / Compatible with:
 
 ## Future ideas | Ideas a futuro
 
-
-**ES**  
-Boton para traducir de forma automatica.
-
-**EN**  
-automatic translate button.
 
 
 
