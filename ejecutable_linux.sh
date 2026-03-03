@@ -1,3 +1,3 @@
 #! /bin/bash
 
-python "Dorouh.py"
+python "Dorouh_v3.py"

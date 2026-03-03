@@ -1,5 +1,4 @@
 @echo off
 
-python "Dorouh.py" %*
-
-pause
+start "" /b pythonw "Dorouh_v3.py" %*
+exit /b
