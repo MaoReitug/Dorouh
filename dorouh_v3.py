@@ -33,8 +33,13 @@ class Dorouh(tk.Tk):
 
         # Configuración de la ventana principal
         self.title("Traductor v3.0")
-        self.geometry("980x720")
-        self.minsize(900, 620)
+        screen_w = self.winfo_screenwidth()
+        screen_h = self.winfo_screenheight()
+        target_w = min(980, max(760, screen_w - 80))
+        target_h = min(720, max(520, screen_h - 100))
+        self.geometry(f"{target_w}x{target_h}")
+        self.minsize(700, 500)
+        self.modo_compacto = screen_h < 800 or screen_w < 1200
         self._configurar_icono_aplicacion()
 
         # Estado mínimo para UI visual
@@ -133,32 +138,54 @@ class Dorouh(tk.Tk):
 
     def initUI(self):
         p = self.palette
+        panel_padx = 16 if self.modo_compacto else 24
+        panel_pady = 14 if self.modo_compacto else 22
+        text_height = 4 if self.modo_compacto else 6
+        text_ipady = 0
+        # Contenedor con scroll para evitar que los botones se oculten en pantallas pequeñas
+        self.canvas = tk.Canvas(self, bg=p["panel"], highlightthickness=0)
+        self.scrollbar_y = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.scrollbar_y.set)
+        self.scrollbar_y.pack(side=tk.RIGHT, fill=tk.Y)
+        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
         self.main_frame = tk.Frame(
-            self,
-            padx=24,
-            pady=22,
+            self.canvas,
+            padx=panel_padx,
+            pady=panel_pady,
             bg=p["panel"],
             bd=1,
             relief="solid",
             highlightbackground=p["border"],
             highlightthickness=1,
         )
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        self.canvas_frame_id = self.canvas.create_window((0, 0), window=self.main_frame, anchor="nw")
+        self.main_frame.bind("<Configure>", self._actualizar_scrollregion)
+        self.canvas.bind("<Configure>", self._ajustar_ancho_canvas)
 
         self.top_frame = tk.Frame(self.main_frame, bg=p["panel"])
         self.top_frame.pack(fill=tk.X, pady=(0, 10))
 
+        self.top_header_row = tk.Frame(self.top_frame, bg=p["panel"])
+        self.top_header_row.pack(fill=tk.X)
+
+        self.top_actions_row = tk.Frame(self.top_frame, bg=p["panel"])
+        self.top_actions_row.pack(fill=tk.X, pady=(8, 0))
+
+        self.content_frame = tk.Frame(self.main_frame, bg=p["panel"])
+        self.content_frame.pack(fill=tk.BOTH, expand=True)
+
         self.etiqueta_archivo = tk.Label(
-            self.top_frame,
+            self.top_header_row,
             text=self.tr("ningun_archivo", "Ningún archivo seleccionado"),
             font=("Segoe UI", 13, "bold"),
             bg=p["panel"],
             fg=p["text"],
         )
-        self.etiqueta_archivo.pack(side=tk.LEFT, padx=(0, 12))
+        self.etiqueta_archivo.pack(side=tk.LEFT, padx=(0, 12), fill=tk.X, expand=True)
 
         self.boton_recargar = ttk.Button(
-            self.top_frame,
+            self.top_actions_row,
             text="⟳ " + self.tr("Recargar", "Recargar"),
             width=12,
             style="Ghost.TButton",
@@ -167,7 +194,7 @@ class Dorouh(tk.Tk):
         self.boton_recargar.pack(side=tk.LEFT, padx=6)
 
         self.boton_buscar = ttk.Button(
-            self.top_frame,
+            self.top_actions_row,
             text="🔍 " + self.tr("buscar_archivo", "Buscar archivo"),
             style="Primary.TButton",
             command=self.seleccionar_archivo,
@@ -175,7 +202,7 @@ class Dorouh(tk.Tk):
         self.boton_buscar.pack(side=tk.LEFT, padx=6)
 
         self.boton_backups = ttk.Button(
-            self.top_frame,
+            self.top_actions_row,
             text="🗂 " + self.tr("Backups", "Backups"),
             width=12,
             style="Ghost.TButton",
@@ -184,7 +211,7 @@ class Dorouh(tk.Tk):
         self.boton_backups.pack(side=tk.LEFT, padx=6)
 
         self.boton_configuraciones = ttk.Button(
-            self.top_frame,
+            self.top_header_row,
             text="⚙ " + self.tr("configuraciones", "Configuraciones"),
             width=15,
             style="Secondary.TButton",
@@ -193,7 +220,7 @@ class Dorouh(tk.Tk):
         self.boton_configuraciones.pack(side=tk.RIGHT, padx=6)
 
         self.lbl_origen = tk.Label(
-            self.main_frame,
+            self.content_frame,
             text=self.tr("Dialogo", "Diálogo"),
             font=("Segoe UI", 10, "bold"),
             bg=p["panel"],
@@ -202,8 +229,8 @@ class Dorouh(tk.Tk):
         self.lbl_origen.pack(anchor="w", pady=(2, 4))
 
         self.texto_seleccionable = tk.Text(
-            self.main_frame,
-            height=10,
+            self.content_frame,
+            height=text_height,
             wrap=tk.WORD,
             font=("Segoe UI", 12),
             bg=p["surface"],
@@ -216,9 +243,9 @@ class Dorouh(tk.Tk):
         )
         self.texto_seleccionable.insert("1.0", self.tr("placeholder_texto_original", "[Texto original]"))
         self.texto_seleccionable.config(state=tk.DISABLED)
-        self.texto_seleccionable.pack(fill=tk.X, pady=(0, 8), ipady=10)
+        self.texto_seleccionable.pack(fill=tk.X, pady=(0, 8))
 
-        buscador_frame = tk.Frame(self.main_frame, bg=p["panel"])
+        buscador_frame = tk.Frame(self.content_frame, bg=p["panel"])
         buscador_frame.pack(fill=tk.X, pady=(0, 8))
 
         self.buscador = ttk.Entry(buscador_frame, font=("Segoe UI", 11), style="App.TEntry")
@@ -235,7 +262,7 @@ class Dorouh(tk.Tk):
         self.boton_copiar.pack(side=tk.RIGHT)
 
         self.lbl_trad = tk.Label(
-            self.main_frame,
+            self.content_frame,
             text=self.tr("Traduccion", "Traducción"),
             font=("Segoe UI", 10, "bold"),
             bg=p["panel"],
@@ -244,8 +271,8 @@ class Dorouh(tk.Tk):
         self.lbl_trad.pack(anchor="w", pady=(2, 4))
 
         self.cuadro_traduccion = tk.Text(
-            self.main_frame,
-            height=10,
+            self.content_frame,
+            height=text_height,
             wrap=tk.WORD,
             font=("Segoe UI", 12),
             bg=p["surface"],
@@ -257,13 +284,20 @@ class Dorouh(tk.Tk):
             insertbackground=p["text"],
         )
         self.cuadro_traduccion.insert("1.0", self.tr("placeholder_traduccion", "[Traducción]"))
-        self.cuadro_traduccion.pack(fill=tk.X, pady=(0, 10), ipady=10)
+        self.cuadro_traduccion.pack(fill=tk.X, pady=(0, 6))
 
-        self.nav_frame = tk.Frame(self.main_frame, bg=p["panel"])
+        # Navegación justo debajo de los cuadros principales
+        self.nav_frame = tk.Frame(self.content_frame, bg=p["panel"])
         self.nav_frame.pack(fill=tk.X, pady=8)
 
-        self.botones_frame = tk.Frame(self.nav_frame, bg=p["panel"])
-        self.botones_frame.pack(expand=True, side=tk.LEFT)
+        self.nav_main_row = tk.Frame(self.nav_frame, bg=p["panel"])
+        self.nav_main_row.pack(fill=tk.X)
+
+        self.nav_extra_row = tk.Frame(self.nav_frame, bg=p["panel"])
+        self.nav_extra_row.pack(fill=tk.X, pady=(8, 0))
+
+        self.botones_frame = tk.Frame(self.nav_main_row, bg=p["panel"])
+        self.botones_frame.pack(expand=True)
 
         self.nav_buttons_row = tk.Frame(self.botones_frame, bg=p["panel"])
         self.nav_buttons_row.pack(anchor="center")
@@ -271,7 +305,7 @@ class Dorouh(tk.Tk):
         self.boton_anterior = ttk.Button(
             self.nav_buttons_row,
             text="← " + self.tr("anterior", "Anterior"),
-            width=18,
+            width=12,
             style="Secondary.TButton",
             command=self.linea_anterior,
         )
@@ -280,7 +314,7 @@ class Dorouh(tk.Tk):
         self.boton_guardar = ttk.Button(
             self.nav_buttons_row,
             text="💾 " + self.tr("guardar", "Guardar"),
-            width=12,
+            width=10,
             style="Primary.TButton",
             command=self.guardar_traduccion,
         )
@@ -289,7 +323,7 @@ class Dorouh(tk.Tk):
         self.boton_siguiente = ttk.Button(
             self.nav_buttons_row,
             text=self.tr("siguiente", "Siguiente") + " →",
-            width=18,
+            width=12,
             style="Secondary.TButton",
             command=self.linea_siguiente,
         )
@@ -309,7 +343,7 @@ class Dorouh(tk.Tk):
         )
         self.check_guardar_duplicadas.pack(anchor="center", pady=(4, 0))
 
-        self.progress_frame = tk.Frame(self.main_frame, bg=p["panel"])
+        self.progress_frame = tk.Frame(self.content_frame, bg=p["panel"])
         self.progress_frame.pack(fill=tk.X, pady=8)
 
         self.etiqueta_progreso = tk.Label(
@@ -330,7 +364,7 @@ class Dorouh(tk.Tk):
         self.boton_ir_vacias.pack(side=tk.RIGHT)
 
         self.boton_lista_lineas = ttk.Button(
-            self.nav_frame,
+            self.nav_extra_row,
             text="📄 " + self.tr("Ver_Lineas", "Ver líneas"),
             width=12,
             style="Ghost.TButton",
@@ -339,7 +373,7 @@ class Dorouh(tk.Tk):
         self.boton_lista_lineas.pack(side=tk.RIGHT, padx=6)
 
         self.boton_autorellenar = ttk.Button(
-            self.nav_frame,
+            self.nav_extra_row,
             text="✨ " + self.tr("Auto_Rellenar", "Auto Rellenar"),
             width=15,
             style="Ghost.TButton",
@@ -521,11 +555,17 @@ class Dorouh(tk.Tk):
         color_fondo = p["panel"]
         color_fg = p["text"]
         # Frames
+        if hasattr(self, "canvas"):
+            self.canvas.config(bg=color_fondo)
         self.main_frame.config(bg=color_fondo)
         self.top_frame.config(bg=color_fondo)
+        self.top_header_row.config(bg=color_fondo)
+        self.top_actions_row.config(bg=color_fondo)
         self.texto_seleccionable.config(bg=p["surface"], fg=color_fg, highlightbackground=p["border"], insertbackground=color_fg)
         self.cuadro_traduccion.config(bg=p["surface"], fg=color_fg, highlightbackground=p["border"], insertbackground=color_fg)
         self.nav_frame.config(bg=color_fondo)
+        self.nav_main_row.config(bg=color_fondo)
+        self.nav_extra_row.config(bg=color_fondo)
         self.botones_frame.config(bg=color_fondo)
         self.nav_buttons_row.config(bg=color_fondo)
         self.progress_frame.config(bg=color_fondo)
@@ -539,6 +579,14 @@ class Dorouh(tk.Tk):
             if isinstance(w, tk.Toplevel):
                 w.config(bg=color_fondo)
 
+    def _actualizar_scrollregion(self, event=None):
+        if hasattr(self, "canvas"):
+            self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+    def _ajustar_ancho_canvas(self, event):
+        # Mantiene el ancho del frame interno igual al canvas, pero sin recolocar botones
+        if hasattr(self, "canvas_frame_id"):
+            self.canvas.itemconfigure(self.canvas_frame_id, width=event.width)
 
     def cambiar_idioma_manual(self, nuevo_idioma):
         self.idioma = nuevo_idioma
@@ -1298,10 +1346,14 @@ class Dorouh(tk.Tk):
         win = tk.Toplevel(self)
         win.title(self.tr("gestion_repetidos", "Gestión de diálogos repetidos"))
         win.geometry("1180x760")
+        win.minsize(900, 650)
         win.config(bg=p["panel"])
+        # Controles de edición arriba
+        frame_edicion = tk.Frame(win, bg=p["panel"])
+        frame_edicion.pack(fill=tk.X, padx=10, pady=(10, 6))
 
         tree_frame = tk.Frame(win, bg=p["panel"])
-        tree_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        tree_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(6, 10))
 
         tree = ttk.Treeview(tree_frame, columns=("Dialogo", "Lineas", "Traducciones"), show="headings")
         tree.heading("Dialogo", text=self.tr("Dialogo", "Diálogo"))
@@ -1326,9 +1378,6 @@ class Dorouh(tk.Tk):
             traducciones_txt = " | ".join(grupo["traducciones"]) if grupo["traducciones"] else self.tr("sin_traducciones", "(sin traducciones)")
             tree.insert("", "end", iid=iid, values=(grupo["dialogo"], lineas_txt, traducciones_txt))
 
-        frame_edicion = tk.Frame(win, bg=p["panel"])
-        frame_edicion.pack(fill=tk.X, padx=10, pady=10)
-
         lbl = tk.Label(
             frame_edicion,
             text=self.tr("selecciona_dialogo_editar", "Selecciona un diálogo para editar sus traducciones:"),
@@ -1340,7 +1389,7 @@ class Dorouh(tk.Tk):
 
         txt_dialogo_frame = tk.Frame(frame_edicion, bg=p["panel"])
         txt_dialogo_frame.pack(fill=tk.X, pady=4)
-        txt_dialogo = tk.Text(txt_dialogo_frame, height=4, font=("Segoe UI", 11), wrap=tk.WORD, state=tk.DISABLED)
+        txt_dialogo = tk.Text(txt_dialogo_frame, height=5, font=("Segoe UI", 11), wrap=tk.WORD, state=tk.DISABLED)
         txt_dialogo_scroll = ttk.Scrollbar(txt_dialogo_frame, orient="vertical", command=txt_dialogo.yview)
         txt_dialogo.configure(yscrollcommand=txt_dialogo_scroll.set)
         txt_dialogo_scroll.pack(side=tk.RIGHT, fill=tk.Y)
@@ -1374,7 +1423,7 @@ class Dorouh(tk.Tk):
 
         editor_frame = tk.Frame(frame_edicion, bg=p["panel"])
         editor_frame.pack(fill=tk.X, pady=(0, 6))
-        txt_traduccion = tk.Text(editor_frame, height=4, font=("Segoe UI", 11), wrap=tk.WORD)
+        txt_traduccion = tk.Text(editor_frame, height=5, font=("Segoe UI", 11), wrap=tk.WORD)
         txt_traduccion_scroll = ttk.Scrollbar(editor_frame, orient="vertical", command=txt_traduccion.yview)
         txt_traduccion.configure(yscrollcommand=txt_traduccion_scroll.set)
         txt_traduccion_scroll.pack(side=tk.RIGHT, fill=tk.Y)
