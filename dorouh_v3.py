@@ -203,7 +203,7 @@ class Dorouh(tk.Tk):
 
         self.texto_seleccionable = tk.Text(
             self.main_frame,
-            height=7,
+            height=10,
             wrap=tk.WORD,
             font=("Segoe UI", 12),
             bg=p["surface"],
@@ -216,7 +216,7 @@ class Dorouh(tk.Tk):
         )
         self.texto_seleccionable.insert("1.0", self.tr("placeholder_texto_original", "[Texto original]"))
         self.texto_seleccionable.config(state=tk.DISABLED)
-        self.texto_seleccionable.pack(fill=tk.X, pady=(0, 8), ipady=7)
+        self.texto_seleccionable.pack(fill=tk.X, pady=(0, 8), ipady=10)
 
         buscador_frame = tk.Frame(self.main_frame, bg=p["panel"])
         buscador_frame.pack(fill=tk.X, pady=(0, 8))
@@ -245,7 +245,7 @@ class Dorouh(tk.Tk):
 
         self.cuadro_traduccion = tk.Text(
             self.main_frame,
-            height=7,
+            height=10,
             wrap=tk.WORD,
             font=("Segoe UI", 12),
             bg=p["surface"],
@@ -257,7 +257,7 @@ class Dorouh(tk.Tk):
             insertbackground=p["text"],
         )
         self.cuadro_traduccion.insert("1.0", self.tr("placeholder_traduccion", "[Traducción]"))
-        self.cuadro_traduccion.pack(fill=tk.X, pady=(0, 10), ipady=7)
+        self.cuadro_traduccion.pack(fill=tk.X, pady=(0, 10), ipady=10)
 
         self.nav_frame = tk.Frame(self.main_frame, bg=p["panel"])
         self.nav_frame.pack(fill=tk.X, pady=8)
@@ -1297,17 +1297,26 @@ class Dorouh(tk.Tk):
         p = self.palette
         win = tk.Toplevel(self)
         win.title(self.tr("gestion_repetidos", "Gestión de diálogos repetidos"))
-        win.geometry("900x600")
+        win.geometry("1180x760")
         win.config(bg=p["panel"])
 
-        tree = ttk.Treeview(win, columns=("Dialogo", "Lineas", "Traducciones"), show="headings")
+        tree_frame = tk.Frame(win, bg=p["panel"])
+        tree_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        tree = ttk.Treeview(tree_frame, columns=("Dialogo", "Lineas", "Traducciones"), show="headings")
         tree.heading("Dialogo", text=self.tr("Dialogo", "Diálogo"))
         tree.heading("Lineas", text=self.tr("Lineas", "Líneas"))
         tree.heading("Traducciones", text=self.tr("Traducciones", "Traducciones"))
-        tree.column("Dialogo", width=350)
-        tree.column("Lineas", width=120)
-        tree.column("Traducciones", width=300)
-        tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        tree.column("Dialogo", width=460, anchor="w")
+        tree.column("Lineas", width=210, anchor="w")
+        tree.column("Traducciones", width=420, anchor="w")
+
+        tree_scroll_y = ttk.Scrollbar(tree_frame, orient="vertical", command=tree.yview)
+        tree_scroll_x = ttk.Scrollbar(tree_frame, orient="horizontal", command=tree.xview)
+        tree.configure(yscrollcommand=tree_scroll_y.set, xscrollcommand=tree_scroll_x.set)
+        tree_scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
+        tree_scroll_x.pack(side=tk.BOTTOM, fill=tk.X)
+        tree.pack(fill=tk.BOTH, expand=True)
 
         grupos_por_iid = {}
         for n, grupo in enumerate(grupos):
@@ -1329,25 +1338,47 @@ class Dorouh(tk.Tk):
         )
         lbl.pack(anchor="w")
 
-        txt_dialogo = tk.Text(frame_edicion, height=2, font=("Segoe UI", 11), state=tk.DISABLED)
-        txt_dialogo.pack(fill=tk.X, pady=4)
+        txt_dialogo_frame = tk.Frame(frame_edicion, bg=p["panel"])
+        txt_dialogo_frame.pack(fill=tk.X, pady=4)
+        txt_dialogo = tk.Text(txt_dialogo_frame, height=4, font=("Segoe UI", 11), wrap=tk.WORD, state=tk.DISABLED)
+        txt_dialogo_scroll = ttk.Scrollbar(txt_dialogo_frame, orient="vertical", command=txt_dialogo.yview)
+        txt_dialogo.configure(yscrollcommand=txt_dialogo_scroll.set)
+        txt_dialogo_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        txt_dialogo.pack(fill=tk.X)
 
-        from tkinter import StringVar
-
-        trad_var = StringVar()
-        combo_trads = ttk.Combobox(frame_edicion, textvariable=trad_var, font=("Segoe UI", 11), state="readonly")
-        combo_trads.pack(fill=tk.X, pady=4)
-
-        lbl_perso = tk.Label(
+        lbl_sugerencias = tk.Label(
             frame_edicion,
-            text=self.tr("traduccion_personalizada", "O escribe una traducción personalizada:"),
+            text=self.tr("traducciones_detectadas", "Traducciones detectadas (clic para cargar):"),
             bg=p["panel"],
             fg=p["text"],
             font=("Segoe UI", 10),
         )
-        lbl_perso.pack(anchor="w", pady=(8, 0))
-        entry_perso = tk.Entry(frame_edicion, font=("Segoe UI", 11))
-        entry_perso.pack(fill=tk.X, pady=(0, 6))
+        lbl_sugerencias.pack(anchor="w", pady=(8, 2))
+
+        sugerencias_frame = tk.Frame(frame_edicion, bg=p["panel"])
+        sugerencias_frame.pack(fill=tk.X, pady=(0, 6))
+        listbox_trads = tk.Listbox(sugerencias_frame, height=4, font=("Segoe UI", 10), exportselection=False)
+        listbox_scroll = ttk.Scrollbar(sugerencias_frame, orient="vertical", command=listbox_trads.yview)
+        listbox_trads.configure(yscrollcommand=listbox_scroll.set)
+        listbox_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        listbox_trads.pack(fill=tk.X)
+
+        lbl_editor = tk.Label(
+            frame_edicion,
+            text=self.tr("editor_traduccion", "Traducción a aplicar (editable):"),
+            bg=p["panel"],
+            fg=p["text"],
+            font=("Segoe UI", 10),
+        )
+        lbl_editor.pack(anchor="w", pady=(2, 0))
+
+        editor_frame = tk.Frame(frame_edicion, bg=p["panel"])
+        editor_frame.pack(fill=tk.X, pady=(0, 6))
+        txt_traduccion = tk.Text(editor_frame, height=4, font=("Segoe UI", 11), wrap=tk.WORD)
+        txt_traduccion_scroll = ttk.Scrollbar(editor_frame, orient="vertical", command=txt_traduccion.yview)
+        txt_traduccion.configure(yscrollcommand=txt_traduccion_scroll.set)
+        txt_traduccion_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        txt_traduccion.pack(fill=tk.X)
 
         lbl_lineas = tk.Label(
             frame_edicion,
@@ -1401,21 +1432,20 @@ class Dorouh(tk.Tk):
                 tree.insert("", "end", iid=iid_nuevo, values=(grupo["dialogo"], lineas_txt, traducciones_txt))
 
             seleccion_actual["iid"] = None
-            combo_trads.set("")
-            combo_trads["values"] = []
+            listbox_trads.delete(0, tk.END)
             txt_dialogo.config(state=tk.NORMAL)
             txt_dialogo.delete("1.0", tk.END)
             txt_dialogo.config(state=tk.DISABLED)
             lbl_lineas.config(text="")
-            entry_perso.delete(0, tk.END)
+            txt_traduccion.delete("1.0", tk.END)
             btn_aplicar.config(state=tk.DISABLED)
 
             if grupos_por_iid:
-                combo_trads.config(state="readonly")
-                entry_perso.config(state="normal")
+                listbox_trads.config(state="normal")
+                txt_traduccion.config(state="normal")
             else:
-                combo_trads.config(state="disabled")
-                entry_perso.config(state="disabled")
+                listbox_trads.config(state="disabled")
+                txt_traduccion.config(state="disabled")
                 lbl_estado.config(text=self.tr("sin_repetidos_restantes", "No quedan grupos repetidos pendientes."))
 
         def on_select(event):
@@ -1432,15 +1462,33 @@ class Dorouh(tk.Tk):
             txt_dialogo.config(state=tk.DISABLED)
 
             candidatos = grupo["traducciones"][:]
-            combo_trads["values"] = candidatos
-            trad_var.set(candidatos[0] if candidatos else "")
+            listbox_trads.delete(0, tk.END)
+            for candidato in candidatos:
+                listbox_trads.insert(tk.END, candidato)
+
+            txt_traduccion.config(state="normal")
+            txt_traduccion.delete("1.0", tk.END)
+            if candidatos:
+                txt_traduccion.insert("1.0", candidatos[0])
+                listbox_trads.selection_clear(0, tk.END)
+                listbox_trads.selection_set(0)
             lbl_estado.config(text="")
 
             lineas_txt = ", ".join(str(i + 1) for i in grupo["lineas_idx"])
             lbl_lineas.config(text=f"{self.tr('Lineas', 'Líneas')}: {lineas_txt}")
 
-            entry_perso.delete(0, tk.END)
             btn_aplicar.config(state=tk.NORMAL)
+
+        def cargar_sugerencia_en_editor(_event=None):
+            seleccion = listbox_trads.curselection()
+            if not seleccion:
+                return
+            texto = listbox_trads.get(seleccion[0])
+            txt_traduccion.config(state="normal")
+            txt_traduccion.delete("1.0", tk.END)
+            txt_traduccion.insert("1.0", texto)
+
+        listbox_trads.bind("<<ListboxSelect>>", cargar_sugerencia_en_editor)
 
         tree.bind("<<TreeviewSelect>>", on_select)
 
@@ -1450,9 +1498,7 @@ class Dorouh(tk.Tk):
                 messagebox.showwarning(self.tr("advertencia", "Advertencia"), self.tr("debes_seleccionar_dialogo", "Debes seleccionar un diálogo."))
                 return
 
-            traduccion_perso = entry_perso.get().strip()
-            traduccion_seleccionada = trad_var.get().strip()
-            traduccion_final = traduccion_perso if traduccion_perso else traduccion_seleccionada
+            traduccion_final = txt_traduccion.get("1.0", tk.END).strip()
 
             if not traduccion_final:
                 messagebox.showwarning(self.tr("advertencia", "Advertencia"), self.tr("debes_elegir_traduccion", "Debes elegir o escribir una traducción."))
@@ -1496,9 +1542,8 @@ class Dorouh(tk.Tk):
             tree.delete(iid)
             del grupos_por_iid[iid]
             seleccion_actual["iid"] = None
-            combo_trads.set("")
-            combo_trads["values"] = []
-            entry_perso.delete(0, tk.END)
+            listbox_trads.delete(0, tk.END)
+            txt_traduccion.delete("1.0", tk.END)
             txt_dialogo.config(state=tk.NORMAL)
             txt_dialogo.delete("1.0", tk.END)
             txt_dialogo.config(state=tk.DISABLED)
@@ -1507,8 +1552,8 @@ class Dorouh(tk.Tk):
             lbl_estado.config(text=f"{self.tr('aplicadas_en', 'Traducción aplicada en')} {cambios} {self.tr('lineas', 'líneas')}.")
 
             if not grupos_por_iid:
-                combo_trads.config(state="disabled")
-                entry_perso.config(state="disabled")
+                listbox_trads.config(state="disabled")
+                txt_traduccion.config(state="disabled")
                 lbl_estado.config(text=self.tr("sin_repetidos_restantes", "No quedan grupos repetidos pendientes."))
 
         btn_aplicar.config(command=aplicar_traduccion)
